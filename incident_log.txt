@@ -1,0 +1,26 @@
+[2026-03-30 23:14:02 UTC] ERROR payout_api - Unhandled exception in /payouts
+  Traceback: KeyError: 'currency'
+  Request body: {"merchant_id": "M4421", "amount": 750.00}
+  Client IP: 10.0.3.47
+
+[2026-03-30 23:14:18 UTC] ERROR payout_api - Unhandled exception in /merchants/M2201/payouts
+  Traceback: KeyError: 'amount'
+  Note: Model uses key 'amt' but API code references 'amount'
+
+[2026-03-30 23:15:01 UTC] WARNING payout_models - Payout created with negative amount
+  payout_id: 9f3a2b7c-..., merchant_id: M1105, amount: -500.00, currency: USD
+  NOTE: No validation exists — this should never reach the database
+
+[2026-03-30 23:15:33 UTC] ERROR payout_models - calculate_fee returned None
+  payout_id: d4e82c19-..., currency: GBP
+  Downstream: net_amount calculation produced TypeError (int - NoneType)
+
+[2026-03-30 23:16:12 UTC] WARNING security - Payout M1105 processed with negative amount
+  net_amount: -515.20 — CREDITS merchant instead of debiting
+  SEVERITY: CRITICAL — financial loss vector
+
+[2026-03-31 01:30:00 UTC] INFO test_runner - Nightly test results: 5 passed, 4 failed
+  FAILED: test_api_merchant_payouts — KeyError: 'amount'
+  FAILED: test_api_missing_fields — AssertionError: 500 != 400
+  FAILED: test_calculate_fee_gbp — no such test exists (coverage gap)
+  FAILED: test_process_duplicate — no such test exists (coverage gap)
