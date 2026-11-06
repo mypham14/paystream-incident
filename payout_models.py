@@ -6,10 +6,24 @@ import uuid
 active_payouts = []
 
 def create_payout(merchant_id, amount, currency, memo=None):
+    if merchant_id is None or not str(merchant_id).strip():
+        raise ValueError("merchant_id is required")
+
+    try:
+        amount_value = float(amount)
+    except (TypeError, ValueError):
+        raise ValueError("amount must be a number")
+
+    if amount_value <= 0:
+        raise ValueError("amount must be greater than 0")
+
+    if currency is None or not str(currency).strip():
+        raise ValueError("currency is required")
+
     payout = {
         "id": str(uuid.uuid4()),
         "merchant_id": merchant_id,
-        "amt": amount,  # BUG: no validation - negative amounts accepted
+        "amount": amount_value,
         "currency": currency,
         "memo": memo,
         "status": "PENDING",
@@ -39,10 +53,14 @@ def process_payout(payout_id):
     p = get_payout(payout_id)
     if p is None:
         return None
-    # BUG: processes even if already COMPLETED — no idempotency
-    fee = calculate_fee(p["amt"], p["currency"])
+
+    try:
+        fee = calculate_fee(p["amount"], p["currency"])
+    except ValueError as exc:
+        raise ValueError(f"Unable to process payout {payout_id}: {exc}") from exc
+
     p["fee"] = fee
-    p["net_amount"] = p["amt"] - fee  # BUG: uses 'amt' not 'amount' — inconsistent key
+    p["net_amount"] = p["amount"] - fee
     p["status"] = "COMPLETED"
     p["processed_at"] = str(datetime.datetime.now())
     return p
@@ -54,4 +72,4 @@ def calculate_fee(amount, currency):
         return round(amount * 0.029 + 0.30, 2)
     elif currency == "EUR":
         return round(amount * 0.035 + 0.50, 2)
-    # BUG: no else clause — returns None for unknown currencies
+    raise ValueError(f"Unsupported currency: {currency}")

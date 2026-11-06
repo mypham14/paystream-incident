@@ -25,7 +25,7 @@ def clear_payouts():
 def test_create_payout():
     p = create_payout("M001", 100.00, "USD")
     assert p["merchant_id"] == "M001"
-    assert p["amt"] == 100.00
+    assert p["amount"] == 100.00
     assert p["status"] == "PENDING"
 
 
@@ -61,7 +61,7 @@ def test_api_create_payout(client):
     })
     assert resp.status_code == 201
     data = resp.get_json()
-    assert data["amt"] == 500.00
+    assert data["amount"] == 500.00
 
 
 def test_api_get_payout(client):
